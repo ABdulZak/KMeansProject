@@ -1,0 +1,93 @@
+version: '3.8'
+
+services:
+  spark-master:
+    build: .
+    container_name: spark-master
+    environment:
+      - SPARK_MODE=master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=9090
+    ports:
+      - "9090:9090"
+      - "7077:7077"
+    volumes:
+      - ./code:/opt/bitnami/spark/code
+      - ./data:/opt/bitnami/spark/data
+
+  spark-worker-1:
+    build: .
+    container_name: spark-worker-1
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_WEBUI_PORT=8081
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./code:/opt/bitnami/spark/code
+      - ./data:/opt/bitnami/spark/data
+
+  spark-worker-2:
+    build: .
+    container_name: spark-worker-2
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_WEBUI_PORT=8082
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./code:/opt/bitnami/spark/code
+      - ./data:/opt/bitnami/spark/data
+
+  spark-worker-3:
+    build: .
+    container_name: spark-worker-3
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_WEBUI_PORT=8083
+    depends_on:
+      - spark-master
+    ports:
+      - "8083:8083"
+    volumes:
+      - ./code:/opt/bitnami/spark/code
+      - ./data:/opt/bitnami/spark/data
+
+  spark-worker-4:
+    build: .
+    container_name: spark-worker-4
+    environment:
+      - SPARK_MODE=worker
+      - SPARK_MASTER_URL=spark://spark-master:7077
+      - SPARK_WORKER_WEBUI_PORT=8084
+    depends_on:
+      - spark-master
+    ports:
+      - "8084:8084"
+    volumes:
+      - ./code:/opt/bitnami/spark/code
+      - ./data:/opt/bitnami/spark/data
+
+  spark-submit:
+    build: .
+    container_name: spark-submit
+    environment:
+      - SPARK_MODE=submit
+      - SPARK_MASTER_URL=spark://spark-master:7077
+    depends_on:
+      - spark-master
+      - spark-worker-1
+      - spark-worker-2
+      - spark-worker-3
+      - spark-worker-4
+    volumes:
+      - ./code:/opt/bitnami/spark/code
+      - ./data:/opt/bitnami/spark/data
+    command: /opt/bitnami/spark/bin/spark-submit --master spark://spark-master:7077 --num-executors 4 /opt/bitnami/spark/code/spark-job-test.py
